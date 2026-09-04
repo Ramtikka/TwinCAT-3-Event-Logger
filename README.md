@@ -207,4 +207,4 @@ Honest next steps if this were headed to production:
 M.Sc. Mechatronics & Robotics — Hochschule Schmalkalden, Germany
 Focus: Battery analytics, embedded systems, industrial automation
 
-[LinkedIn](#) · [Email](#) · [GitHub](#)
+[LinkedIn](https://www.linkedin.com/in/ramakrishna-tikka/) · [Email](ramakrishnatikka0907@gmail.com) · [GitHub](https://github.com/Ramtikka/Ramtikka)
