@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <POU Name="updateDatetimeStamp" Id="{461349c2-9e66-4c0d-82de-fe1aef8af1c9}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION updateDatetimeStamp
+VAR_INPUT
+	stEvent : REFERENCE TO ST_Event;
+	
+END_VAR
+VAR
+	fbgetSystemTime: GETSYSTEMTIME;
+	tFilename : T_FILETIME;	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fbgetSystemTime(timeLoDW => tFilename.dwLowDateTime,
+	timeHiDW => tFilename.dwHighDateTime);
+	
+stEvent.dtTimeStamp := FILETIME_TO_DT( filetime:= tFilename);]]></ST>
+    </Implementation>
+    <LineIds Name="updateDatetimeStamp">
+      <LineId Id="9" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="23" Count="1" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

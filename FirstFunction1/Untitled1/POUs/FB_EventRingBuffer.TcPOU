@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <POU Name="FB_EventRingBuffer" Id="{79d13302-3958-48fe-96d8-2afbac72a2d0}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_eventRingBuffer
+VAR
+	bufferRingArray : ARRAY[1..20] OF ST_Event;
+	headIndex : INT := 1;
+	tailIndex : INT := 1;
+	currentPosition : INT := 1;
+	
+END_VAR
+VAR CONSTANT
+	ringBufferSize : INT := 20;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Apend" Id="{5b1cde54-9656-42c6-9317-400f7ce8851a}">
+      <Declaration><![CDATA[METHOD Apend : BOOL
+VAR_INPUT
+	stEvent : ST_Event;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF currentPosition >= ringBufferSize THEN
+	Apend:= FALSE;
+ELSE
+	bufferRingArray[headIndex]:= stEvent;		
+	headIndex := headIndex+1;
+	currentPosition:=currentPosition+1;
+	Apend:= True;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Remove" Id="{013e1d0a-326c-4d96-b493-210e65f797d3}">
+      <Declaration><![CDATA[METHOD Remove : BOOL
+VAR_OUTPUT
+	stEvent: ST_Event;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF currentPosition:=0 THEN
+	Remove:= FALSE;
+ELSE
+	stEvent:= bufferRingArray[currentPosition];
+	tailIndex:= tailIndex+1;
+	currentPosition:= currentPosition-1;
+	Remove:= TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_EventRingBuffer">
+      <LineId Id="9" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventRingBuffer.Apend">
+      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="9" Count="4" />
+      <LineId Id="8" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_EventRingBuffer.Remove">
+      <LineId Id="5" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="11" Count="2" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="8" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

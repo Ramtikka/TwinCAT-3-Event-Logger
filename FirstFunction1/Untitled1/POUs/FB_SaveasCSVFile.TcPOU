@@ -1,0 +1,127 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.16">
+  <POU Name="FB_SaveasCSVFile" Id="{01ae8648-2ac2-4edc-95e4-525f41831fd8}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FB_SaveasCSVFile IMPLEMENTS I_PersistentEventStorage
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	fileopen : FB_FileOpen:= (sPathName:= 'C:\Users\ramak\Downloads\Event Logger\Events.log',nMode:= FOPEN_MODEAPPEND OR FOPEN_MODETEXT);
+	fileputs :  FB_FilePuts;
+	eWriteState : (fileOpenTrigger, fileOpen, waitForTheEvent,eventWriteTrigger, eventWrite, fileClose, errorHandeling);
+	stEventWriteToFile : ST_Event;
+	createdCSVString : T_MaxString;
+	fbEventRingBuffer : FB_EventRingBuffer;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE eWriteState OF
+	fileOpenTrigger: 
+		fileopen(bExecute:= TRUE);
+		eWriteState := fileOpen;
+		
+	fileOpen :
+		fileopen(bExecute:= FALSE);
+		IF fileopen.bError THEN
+			eWriteState:= errorHandeling;
+		ELSIF NOT fileopen.bBusy AND fileopen.hFile <> 0 THEN
+			eWriteState := waitForTheEvent;
+		END_IF
+	waitForTheEvent :
+		    IF fbEventRingBuffer.Remove(stEvent => stEventWriteToFile) THEN
+        eWriteState := eventWriteTrigger;
+    END_IF
+
+	eventWriteTrigger :
+		createdCSVString := concatString(stEvent:= stEventWriteToFile);
+		fileputs(bExecute:= TRUE, sLine:=createdCSVString, hFile:=fileopen.hFile);
+		eWriteState:= eventWrite;
+		
+	eventWrite:
+		fileputs(bExecute:= FALSE);
+		IF fileputs.bError THEN
+			eWriteState:= errorHandeling;
+			ELSIF NOT fileputs.bBusy THEN
+				eWriteState:= waitForTheEvent;
+		END_IF
+		
+	errorHandeling :
+	//noting
+	
+END_CASE]]></ST>
+    </Implementation>
+    <Method Name="concatString" Id="{327be36b-a4dc-4aeb-94e1-1dacfd82036f}">
+      <Declaration><![CDATA[METHOD PRIVATE concatString : T_MaxString
+VAR_INPUT
+	stEvent : REFERENCE TO ST_Event;
+END_VAR
+VAR
+	stringFlag : T_MaxString;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[stringFlag:= TO_STRING(stEvent.eEventType);
+stringFlag := CONCAT(STR1:= stringFlag, STR2:= TO_STRING(stEvent.eEventSeverity));
+stringFlag := CONCAT(STR1:= stringFlag, STR2:= ',');
+stringFlag := CONCAT(STR1:= stringFlag, STR2:= TO_STRING(stEvent.dtTimeStamp));
+stringFlag := CONCAT(STR1:= stringFlag, STR2:= ',');
+stringFlag := CONCAT(STR1:= stringFlag, STR2:= TO_STRING(stEvent.nEventIdentity));
+stringFlag := CONCAT(STR1:= stringFlag, STR2:= ',');
+stringFlag := CONCAT(STR1:= stringFlag, STR2:= stEvent.sEventText);
+stringFlag := CONCAT(STR1:= stringFlag, STR2:= '\n');
+concatString := stringFlag;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="storeEvent" Id="{c392af54-cbd9-408d-9f08-46672b69169e}">
+      <Declaration><![CDATA[METHOD storeEvent
+VAR_INPUT
+	stEvent	: ST_Event;
+END_VAR
+VAR
+	fbEventRingBuffer : FB_EventRingBuffer;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fbEventRingBuffer.Apend(stEvent:=stEvent);
+
+
+//IF eWriteState = waitForTheEvent THEN
+	//eWriteState := eventWriteTrigger;
+	//stEventWriteToFile :=stEvent;
+//END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="FB_SaveasCSVFile">
+      <LineId Id="9" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="23" Count="1" />
+      <LineId Id="35" Count="1" />
+      <LineId Id="38" Count="1" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="70" Count="1" />
+      <LineId Id="40" Count="1" />
+      <LineId Id="27" Count="1" />
+      <LineId Id="45" Count="2" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="48" Count="1" />
+      <LineId Id="52" Count="1" />
+      <LineId Id="50" Count="1" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="21" Count="0" />
+    </LineIds>
+    <LineIds Name="FB_SaveasCSVFile.concatString">
+      <LineId Id="5" Count="0" />
+      <LineId Id="10" Count="8" />
+    </LineIds>
+    <LineIds Name="FB_SaveasCSVFile.storeEvent">
+      <LineId Id="30" Count="2" />
+      <LineId Id="27" Count="2" />
+      <LineId Id="17" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
